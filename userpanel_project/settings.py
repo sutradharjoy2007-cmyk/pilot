@@ -35,7 +35,7 @@ _raw_hosts = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1')
 ALLOWED_HOSTS = [h.strip() for h in _raw_hosts.split(',')]
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://pagepilot-btwt.onrender.com",
+    "https://pagepilot-fqji.onrender.com",
 ]
 
 CSRF_COOKIE_SECURE = True
@@ -192,5 +192,5 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", EMAIL_HOST_USER)
 
 # Site info (used in email templates)
-SITE_URL = os.getenv("SITE_URL", "http://127.0.0.1:8000")
-SITE_NAME = os.getenv("SITE_NAME", "Page sPilot")
+SITE_URL = os.getenv("SITE_URL", "https://pagepilot-fqji.onrender.com")
+SITE_NAME = os.getenv("SITE_NAME", "Page Pilot")
