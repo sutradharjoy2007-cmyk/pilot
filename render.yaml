@@ -23,7 +23,7 @@ services:
         value: ".onrender.com"
 
       - key: CSRF_TRUSTED_ORIGINS
-        value: "https://pagepilot-btwt.onrender.com"
+        value: "https://pagepilot-fqji.onrender.com"
 
       - key: SECRET_KEY
         generateValue: true
@@ -50,7 +50,7 @@ services:
       - key: SITE_NAME
         value: "Page Pilot"
       - key: SITE_URL
-        value: "https://pagepilot-btwt.onrender.com"
+        value: "https://pagepilot-fqji.onrender.com"
 
       - key: API_ADMIN_PASSWORD
         sync: false
