@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block title %}Package Expired - User Panel{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center p-4">
+    <div class="max-w-md w-full bg-white rounded-2xl shadow-2xl p-8 text-center">
+        <div class="inline-block p-4 bg-red-100 rounded-full mb-6 animate-pulse">
+            <svg class="w-12 h-12 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+        </div>
+
+        <h1 class="text-3xl font-bold text-gray-800 mb-4">Package Expired</h1>
+
+        <p class="text-gray-600 mb-8">
+            Your package time is over. Please recharge again to continue accessing the user panel and AI features.
+        </p>
+
+        <div class="bg-gray-50 rounded-lg p-4 mb-8 border border-gray-200">
+            <p class="text-sm text-gray-500 mb-1">Last Package</p>
+            <p class="font-bold text-gray-800 text-lg">{{ request.user.profile.package_name }}</p>
+            <p class="text-sm text-red-500 mt-1">Expired on {{ request.user.profile.subscription_expiry|date:"M d, Y" }}
+            </p>
+        </div>
+
+        <a href="{% url 'logout' %}"
+            class="inline-block w-full bg-gradient-to-r from-red-600 to-pink-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-red-700 hover:to-pink-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+            Logout
+        </a>
+
+        <p class="mt-6 text-xs text-gray-400">
+            Contact support to renew your subscription
+        </p>
+    </div>
+</div>
+{% endblock %}

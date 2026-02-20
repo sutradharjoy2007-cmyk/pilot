@@ -1,0 +1,143 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block title %}KYC Requests{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">KYC Verification Requests</h1>
+    <p class="text-slate-400">Review pending documents for user verification.</p>
+</div>
+
+{% if kyc_requests %}
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+    {% for profile in kyc_requests %}
+    <div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden flex flex-col">
+        <!-- Document Preview -->
+        <div class="h-48 bg-slate-900 relative group overflow-hidden grid grid-cols-2 gap-1 px-1 py-1">
+            <!-- Front Image -->
+            <div class="relative h-full overflow-hidden rounded">
+                {% if profile.kyc_front_image %}
+                <img src="{{ profile.kyc_front_image.url }}" alt="Front" class="w-full h-full object-cover">
+                <a href="{{ profile.kyc_front_image.url }}" target="_blank"
+                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <span class="text-xs text-white bg-black/50 px-2 py-1 rounded">Front</span>
+                </a>
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center text-slate-500 bg-slate-800 text-xs">No Front
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Back Image -->
+            <div class="relative h-full overflow-hidden rounded">
+                {% if profile.kyc_back_image %}
+                <img src="{{ profile.kyc_back_image.url }}" alt="Back" class="w-full h-full object-cover">
+                <a href="{{ profile.kyc_back_image.url }}" target="_blank"
+                    class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <span class="text-xs text-white bg-black/50 px-2 py-1 rounded">Back</span>
+                </a>
+                {% else %}
+                <div class="w-full h-full flex items-center justify-center text-slate-500 bg-slate-800 text-xs">No Back
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- User Info -->
+        <div class="p-6 flex-1 flex flex-col">
+            <div class="flex items-center mb-4">
+                {% if profile.profile_picture %}
+                <a href="{% url 'admin_user_detail' profile.id %}"><img src="{{ profile.profile_picture.url }}" alt=""
+                        class="w-10 h-10 rounded-full mr-3 object-cover border border-slate-600"></a>
+                {% else %}
+                <div>
+                    class="w-10 h-10 rounded-full bg-slate-700 flex items-center justify-center mr-3 text-sm font-bold
+                    text-white">
+                    {{ profile.user.email.0|upper }}
+                </div>
+                {% endif %}
+                <div>
+                    <a href="{% url 'admin_user_detail' profile.id %}">
+                        <h3 class="font-bold text-white truncate w-40">{{ profile.name|default:"No Name" }}</h3>
+                    </a>
+                    <a href="{% url 'admin_user_detail' profile.id %}">
+                        <p class="text-xs text-slate-400">{{ profile.user.email }}</p>
+                    </a>
+                </div>
+            </div>
+
+            <div class="space-y-2 mb-6">
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Submitted:</span>
+                    <span class="text-slate-200">{{ profile.user.date_joined|timesince }} ago</span>
+                    <!-- ideally we should track submission date, using joined for now/demo -->
+                </div>
+                <div class="flex justify-between text-sm">
+                    <span class="text-slate-400">Mobile:</span>
+                    <span class="text-slate-200">{{ profile.mobile_number|default:"-" }}</span>
+                </div>
+            </div>
+
+            <form action="{% url 'admin_kyc_action' %}" method="post" class="mt-auto"
+                id="kyc-form-{{ profile.user.id }}">
+                {% csrf_token %}
+                <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                <input type="hidden" name="action" value="" id="kyc-action-{{ profile.user.id }}">
+
+                <!-- Rejection reason (hidden by default) -->
+                <div class="mb-3 hidden" id="reject-reason-{{ profile.user.id }}">
+                    <label class="block text-xs text-slate-400 mb-1">Rejection Reason</label>
+                    <textarea name="rejection_reason" rows="2" placeholder="e.g. Blurry image, wrong document..."
+                        class="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-red-500 resize-none"></textarea>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                    <button type="submit"
+                        onclick="document.getElementById('kyc-action-{{ profile.user.id }}').value='approve'"
+                        class="bg-green-500/10 hover:bg-green-500/20 text-green-400 border border-green-500/20 py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <i data-lucide="check" class="w-4 h-4 mr-2"></i> Approve
+                    </button>
+                    <button type="button" onclick="showRejectReason('{{ profile.user.id }}')"
+                        id="reject-btn-{{ profile.user.id }}"
+                        class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/20 py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                        <i data-lucide="x" class="w-4 h-4 mr-2"></i> Reject
+                    </button>
+                </div>
+
+                <!-- Confirm reject button (hidden by default) -->
+                <button type="submit"
+                    onclick="document.getElementById('kyc-action-{{ profile.user.id }}').value='reject'"
+                    id="confirm-reject-{{ profile.user.id }}"
+                    class="hidden w-full mt-2 bg-red-600 hover:bg-red-700 text-white py-2 rounded-lg font-medium transition-colors flex items-center justify-center">
+                    <i data-lucide="alert-triangle" class="w-4 h-4 mr-2"></i> Confirm Rejection
+                </button>
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="bg-slate-800 border border-slate-700 rounded-xl p-12 text-center">
+    <div class="bg-slate-900 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+        <i data-lucide="check-circle" class="w-8 h-8 text-green-500"></i>
+    </div>
+    <h3 class="text-xl font-bold text-white mb-2">All Caught Up!</h3>
+    <p class="text-slate-400">There are no pending KYC verification requests at the moment.</p>
+</div>
+{% endif %}
+
+<script>
+    function showRejectReason(userId) {
+        const reasonDiv = document.getElementById('reject-reason-' + userId);
+        const confirmBtn = document.getElementById('confirm-reject-' + userId);
+        const rejectBtn = document.getElementById('reject-btn-' + userId);
+
+        reasonDiv.classList.remove('hidden');
+        confirmBtn.classList.remove('hidden');
+        confirmBtn.classList.add('flex');
+        rejectBtn.classList.add('hidden');
+
+        // Re-render Lucide icons for the newly visible button
+        if (typeof lucide !== 'undefined') lucide.createIcons();
+    }
+</script>
+{% endblock %}

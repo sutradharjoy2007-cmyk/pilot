@@ -1,0 +1,218 @@
+{% extends 'custom_admin/base_admin.html' %}
+{% block title %}Subscriptions{% endblock %}
+
+{% block content %}
+<div class="mb-8">
+    <h1 class="text-3xl font-bold text-white mb-2">Subscription Management</h1>
+    <p class="text-slate-400">Monitor and manage all user subscriptions.</p>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-slate-400 text-sm font-medium">Active</h3>
+            <div class="bg-green-500/10 p-2 rounded-lg">
+                <i data-lucide="check-circle" class="w-5 h-5 text-green-400"></i>
+            </div>
+        </div>
+        <span class="text-2xl font-bold text-white">{{ total_active }}</span>
+    </div>
+
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-slate-400 text-sm font-medium">Expiring Soon (7d)</h3>
+            <div class="bg-yellow-500/10 p-2 rounded-lg">
+                <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-400"></i>
+            </div>
+        </div>
+        <span class="text-2xl font-bold text-white">{{ expiring_soon }}</span>
+    </div>
+
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-slate-400 text-sm font-medium">Expired</h3>
+            <div class="bg-red-500/10 p-2 rounded-lg">
+                <i data-lucide="x-circle" class="w-5 h-5 text-red-400"></i>
+            </div>
+        </div>
+        <span class="text-2xl font-bold text-white">{{ total_expired }}</span>
+    </div>
+
+    <div class="bg-slate-800 border border-slate-700 rounded-xl p-6">
+        <div class="flex items-center justify-between mb-3">
+            <h3 class="text-slate-400 text-sm font-medium">Never Subscribed</h3>
+            <div class="bg-slate-500/10 p-2 rounded-lg">
+                <i data-lucide="minus-circle" class="w-5 h-5 text-slate-400"></i>
+            </div>
+        </div>
+        <span class="text-2xl font-bold text-white">{{ never_subscribed }}</span>
+    </div>
+</div>
+
+<!-- Filters & Search -->
+<div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+    <div class="flex flex-col md:flex-row gap-4 w-full md:w-auto">
+        <!-- Search -->
+        <form method="get" class="relative">
+            <input type="text" name="q" value="{{ query }}" placeholder="Search users..."
+                class="bg-slate-800 text-white pl-10 pr-4 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-blue-500 w-full md:w-64">
+            <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-3"></i>
+            {% if status_filter != 'all' %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+        </form>
+
+        <!-- Filter -->
+        <div class="relative">
+            <select onchange="window.location.href=this.value"
+                class="bg-slate-800 text-white pl-4 pr-8 py-2 rounded-lg border border-slate-700 focus:outline-none focus:border-blue-500 appearance-none cursor-pointer">
+                <option value="?status=all{% if query %}&q={{ query }}{% endif %}" {% if status_filter == 'all' %}selected{% endif %}>All Users</option>
+                <option value="?status=active{% if query %}&q={{ query }}{% endif %}" {% if status_filter == 'active' %}selected{% endif %}>Active</option>
+                <option value="?status=expiring_soon{% if query %}&q={{ query }}{% endif %}" {% if status_filter == 'expiring_soon' %}selected{% endif %}>Expiring Soon</option>
+                <option value="?status=expired{% if query %}&q={{ query }}{% endif %}" {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+                <option value="?status=never{% if query %}&q={{ query }}{% endif %}" {% if status_filter == 'never' %}selected{% endif %}>Never Subscribed</option>
+            </select>
+            <i data-lucide="filter" class="w-4 h-4 text-slate-400 absolute right-3 top-3 pointer-events-none"></i>
+        </div>
+    </div>
+</div>
+
+<!-- Subscription Table -->
+<div class="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-xl">
+    <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="bg-slate-900/50 border-b border-slate-700">
+                    <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">User</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Package</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Status</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Expiry Date</th>
+                    <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Quick Extend
+                    </th>
+                    <th class="px-6 py-4 text-xs font-semibold text-slate-400 uppercase tracking-wider">Action</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700">
+                {% for profile in profiles %}
+                <tr class="hover:bg-slate-700/50 transition-colors group">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            {% if profile.profile_picture %}
+                            <img src="{{ profile.profile_picture.url }}" alt=""
+                                class="w-10 h-10 rounded-full mr-3 object-cover border-2 border-slate-600">
+                            {% else %}
+                            <div
+                                class="w-10 h-10 rounded-full bg-gradient-to-br from-slate-600 to-slate-700 flex items-center justify-center mr-3 text-sm font-bold shadow-inner">
+                                {{ profile.user.email.0|upper }}
+                            </div>
+                            {% endif %}
+                            <div>
+                                <div class="font-medium text-white">{{ profile.name|default:"No Name" }}</div>
+                                <div class="text-xs text-slate-400 max-w-[150px] truncate"
+                                    title="{{ profile.user.email }}">{{ profile.user.email }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-slate-300 font-medium">{{ profile.package_name|default:"—" }}</div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        {% if profile.subscription_expiry %}
+                        {% if profile.is_subscription_active %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-500/10 text-green-400 border border-green-500/20">
+                            <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i> Active
+                        </span>
+                        {% else %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-500/10 text-red-400 border border-red-500/20">
+                            <i data-lucide="x-circle" class="w-3 h-3 mr-1"></i> Expired
+                        </span>
+                        {% endif %}
+                        {% else %}
+                        <span
+                            class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-400 border border-slate-500/20">
+                            Never
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-slate-400">
+                        {% if profile.subscription_expiry %}
+                        {{ profile.subscription_expiry|date:"M d, Y" }}
+                        {% else %}
+                        —
+                        {% endif %}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <form method="post" class="flex gap-1">
+                            {% csrf_token %}
+                            <input type="hidden" name="user_id" value="{{ profile.user.id }}">
+                            <button type="submit" name="days" value="7"
+                                class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white transition-colors">+7d</button>
+                            <button type="submit" name="days" value="15"
+                                class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white transition-colors">+15d</button>
+                            <button type="submit" name="days" value="30"
+                                class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white transition-colors">+30d</button>
+                            <button type="submit" name="days" value="90"
+                                class="px-2 py-1 bg-slate-700 hover:bg-slate-600 rounded text-xs text-white transition-colors">+90d</button>
+                        </form>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <a href="{% url 'admin_user_detail' profile.user.pk %}"
+                            class="inline-flex items-center px-3 py-1.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 hover:text-blue-300 rounded-md transition-colors text-sm font-medium border border-blue-500/20">
+                            Manage
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="px-6 py-12 text-center">
+                        <div class="flex flex-col items-center justify-center">
+                            <i data-lucide="search-x" class="w-12 h-12 text-slate-600 mb-4"></i>
+                            <p class="text-slate-500 text-lg">No subscriptions found matching your criteria.</p>
+                            {% if query or status_filter != 'all' %}
+                            <a href="{% url 'admin_subscription_list' %}"
+                                class="mt-4 text-blue-400 hover:text-blue-300 text-sm">Clear Filters</a>
+                            {% endif %}
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Pagination -->
+    {% if page_obj.has_other_pages %}
+    <div class="px-6 py-4 border-t border-slate-700 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="text-sm text-slate-400">
+            Showing {{ page_obj.start_index }}-{{ page_obj.end_index }} of {{ page_obj.paginator.count }} subscriptions
+        </div>
+        <div class="flex items-center gap-1">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}"
+                class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition-colors">
+                <i data-lucide="chevron-left" class="w-4 h-4 inline"></i> Prev
+            </a>
+            {% endif %}
+
+            {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <span class="px-3 py-1.5 bg-blue-600 text-white rounded-lg text-sm font-medium">{{ num }}</span>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %} <a
+                href="?page={{ num }}{% if query %}&q={{ query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}"
+                class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition-colors">
+                {{ num }}</a>
+                {% endif %}
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if query %}&q={{ query }}{% endif %}{% if status_filter != 'all' %}&status={{ status_filter }}{% endif %}"
+                    class="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-slate-300 rounded-lg text-sm transition-colors">
+                    Next <i data-lucide="chevron-right" class="w-4 h-4 inline"></i>
+                </a>
+                {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

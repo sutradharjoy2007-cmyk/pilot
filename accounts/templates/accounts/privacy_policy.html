@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - {{ profile.name|default:page_user.email }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 min-h-screen">
+
+    <!-- Top Bar -->
+    <header class="bg-white shadow-sm border-b border-gray-200">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 flex items-center justify-center">
+                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h1
+                        class="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                        Page Pilot
+                    </h1>
+                </div>
+                <span class="text-xs text-gray-400 font-medium">Privacy Policy</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+
+        <!-- Hero Section -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="bg-gradient-to-r from-blue-600 to-purple-600 px-6 sm:px-10 py-8 sm:py-12">
+                <div class="flex items-center gap-4 mb-4">
+                    {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" alt="Profile"
+                        class="w-16 h-16 rounded-full object-cover border-3 border-white shadow-lg">
+                    {% else %}
+                    <div
+                        class="w-16 h-16 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-white text-2xl font-bold shadow-lg">
+                        {{ page_user.email.0|upper }}
+                    </div>
+                    {% endif %}
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-white">
+                            {{ profile.name|default:"Business" }}
+                        </h1>
+                        <p class="text-blue-100 text-sm mt-1">Privacy Policy & Business Information</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Business Info Section -->
+            <div class="px-6 sm:px-10 py-8 sm:py-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-blue-100 rounded-lg">
+                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">About the Business</h2>
+                </div>
+
+                <div class="prose prose-gray max-w-none">
+                    <div class="text-gray-700 leading-relaxed whitespace-pre-wrap text-sm sm:text-base">{{profile.business_info }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Privacy Policy Content -->
+        <div class="bg-white rounded-2xl shadow-xl overflow-hidden mb-8">
+            <div class="px-6 sm:px-10 py-8 sm:py-10">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-purple-100 rounded-lg">
+                        <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z">
+                            </path>
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-800">Privacy Policy</h2>
+                </div>
+
+                <div class="space-y-6 text-gray-700 text-sm sm:text-base leading-relaxed">
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">1. Information We Collect</h3>
+                        <p>We may collect information that you provide directly to us, including your name, email
+                            address, phone number, and any messages or comments you submit through our Facebook Page.
+                            We also collect data automatically when you interact with our page, such as engagement
+                            metrics and public profile information as permitted by Facebook's platform policies.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">2. How We Use Your Information</h3>
+                        <p>Your information is used to provide and improve our services, respond to your inquiries, and
+                            communicate with you about relevant updates. We may also use automated tools, including
+                            AI-powered assistants, to help manage interactions on our Facebook Page in a timely and
+                            efficient manner.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">3. AI-Powered Interactions</h3>
+                        <p>Our Facebook Page utilizes AI-powered tools to assist with responding to comments and
+                            messages.
+                            These tools process publicly available information and direct messages to provide relevant
+                            and
+                            helpful responses. All AI-generated responses are designed to be informative and are
+                            governed
+                            by our business guidelines.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">4. Data Sharing & Security</h3>
+                        <p>We do not sell your personal information to third parties. We may share data with trusted
+                            service providers who help us manage our page, subject to strict confidentiality agreements.
+                            We implement appropriate technical and organizational measures to protect your information
+                            against unauthorized access, alteration, or destruction.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">5. Your Rights</h3>
+                        <p>You have the right to access, correct, or delete your personal information that we hold.
+                            You may also opt out of any communications from us. To exercise these rights, please contact
+                            us directly through our Facebook Page or via the contact information provided below.</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">6. Contact Information</h3>
+                        <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                            <div class="space-y-2">
+                                {% if profile.name %}
+                                <p><span class="font-medium text-gray-600">Name:</span> {{ profile.name }}</p>
+                                {% endif %}
+                                <p><span class="font-medium text-gray-600">Email:</span> {{ page_user.email }}</p>
+                                {% if profile.mobile_number %}
+                                <p><span class="font-medium text-gray-600">Phone:</span> {{ profile.mobile_number }}</p>
+                                {% endif %}
+                                {% if profile.home_address %}
+                                <p><span class="font-medium text-gray-600">Address:</span> {{ profile.home_address }}
+                                </p>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-800 mb-2">7. Changes to This Policy</h3>
+                        <p>We may update this privacy policy from time to time. Any changes will be reflected on this
+                            page with an updated effective date. We encourage you to review this policy periodically.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="text-center text-xs text-gray-400 pb-8">
+            <p>Powered by <span
+                    class="font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Page
+                    Pilot</span></p>
+        </div>
+    </main>
+
+</body>
+
+</html>

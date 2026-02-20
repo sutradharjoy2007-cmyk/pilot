@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+</head>
+
+<body style="margin:0;padding:0;background-color:#0f172a;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#0f172a;padding:40px 20px;">
+        <tr>
+            <td align="center">
+                <table width="600" cellpadding="0" cellspacing="0"
+                    style="background-color:#1e293b;border-radius:16px;overflow:hidden;border:1px solid #334155;">
+                    <!-- Header -->
+                    <tr>
+                        <td
+                            style="background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:40px 40px 30px;text-align:center;">
+                            <div style="font-size:40px;margin-bottom:12px;">🚀</div>
+                            <h1 style="color:#ffffff;margin:0;font-size:28px;font-weight:700;">Welcome to {{ site_name }}!</h1>
+                            <p style="color:rgba(255,255,255,0.85);margin:10px 0 0;font-size:16px;">Your account has been created successfully</p>
+                        </td>
+                    </tr>
+
+                    <!-- Body -->
+                    <tr>
+                        <td style="padding:40px;">
+                            <p style="color:#e2e8f0;font-size:16px;line-height:1.6;margin:0 0 20px;">
+                                Hi <strong style="color:#ffffff;">{{ user_name }}</strong>,
+                            </p>
+                            <p style="color:#94a3b8;font-size:15px;line-height:1.6;margin:0 0 20px;">
+                                Thank you for signing up! We're excited to have you on board. Here's what you can do
+                                next:
+                            </p>
+
+                            <!-- Steps -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin:20px 0;">
+                                <tr>
+                                    <td
+                                        style="padding:12px 16px;background-color:#0f172a;border-radius:10px;border-left:4px solid #3b82f6;margin-bottom:8px;">
+                                        <p
+                                            style="color:#93c5fd;font-size:13px;font-weight:600;margin:0 0 4px;text-transform:uppercase;">
+                                            Step 1</p>
+                                        <p style="color:#e2e8f0;font-size:14px;margin:0;">Complete your profile with
+                                            personal details and a profile photo</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:8px;"></td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="padding:12px 16px;background-color:#0f172a;border-radius:10px;border-left:4px solid #8b5cf6;">
+                                        <p
+                                            style="color:#c4b5fd;font-size:13px;font-weight:600;margin:0 0 4px;text-transform:uppercase;">
+                                            Step 2</p>
+                                        <p style="color:#e2e8f0;font-size:14px;margin:0;">Submit your KYC documents
+                                            (NID/Passport) for verification</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="height:8px;"></td>
+                                </tr>
+                                <tr>
+                                    <td
+                                        style="padding:12px 16px;background-color:#0f172a;border-radius:10px;border-left:4px solid #22c55e;">
+                                        <p
+                                            style="color:#86efac;font-size:13px;font-weight:600;margin:0 0 4px;text-transform:uppercase;">
+                                            Step 3</p>
+                                        <p style="color:#e2e8f0;font-size:14px;margin:0;">Once verified, configure your
+                                            AI agent and start automating!</p>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- CTA Button -->
+                            <table width="100%" cellpadding="0" cellspacing="0" style="margin:30px 0 10px;">
+                                <tr>
+                                    <td align="center">
+                                        <a href="{{ site_url }}/login/"
+                                            style="display:inline-block;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#ffffff;text-decoration:none;padding:14px 40px;border-radius:10px;font-size:16px;font-weight:600;">
+                                            Log In to Your Account →
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="padding:20px 40px 30px;border-top:1px solid #334155;text-align:center;">
+                            <p style="color:#64748b;font-size:13px;margin:0;">
+                                © {{ site_name }} • You received this because you signed up with {{ email }}
+                            </p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
+</body>
+
+</html>

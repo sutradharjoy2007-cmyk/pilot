@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Agent - User Panel{% endblock %}
+
+{% block content %}
+<div class="p-6 lg:p-8">
+    <!-- Header -->
+    <div class="mb-8 flex items-center justify-between">
+        <div>
+            <h1 class="text-4xl font-bold text-gray-800">AI Agent Configuration</h1>
+            <p class="text-gray-500 mt-2">Configure your AI agent settings and get your webhook URL</p>
+        </div>
+        <div id="save-status" class="text-sm font-medium transition-all duration-300"></div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Webhook URL Card -->
+        <div class="lg:col-span-1 space-y-6">
+            <div class="bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-2xl p-6 text-white  top-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1">
+                        </path>
+                    </svg>
+                    <h2 class="text-xl font-bold">Your Webhook URL</h2>
+                </div>
+
+                <div class="bg-white bg-opacity-20 backdrop-blur-lg rounded-lg p-4 mb-4">
+                    <p class="text-xs font-medium mb-2 opacity-90">Webhook Endpoint</p>
+                    <p class="text-sm font-mono break-all" id="webhook-url">{{ webhook_url }}</p>
+                </div>
+
+                <button onclick="copyWebhookUrl()"
+                    class="w-full bg-white text-blue-600 font-semibold py-3 px-6 rounded-lg hover:bg-gray-100 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl flex items-center justify-center space-x-2">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                    <span id="copy-btn-text">Copy URL</span>
+                </button>
+
+                <div class="mt-4 p-4 bg-white bg-opacity-10 backdrop-blur-lg rounded-lg">
+                    <p class="text-xs opacity-90">
+                        <strong>Note:</strong> This webhook URL is unique to your account. Use it to connect your
+                        Facebook page to the AI agent.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Agent Status Card -->
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-800">Agent Status</h3>
+                        <p class="text-sm text-gray-500 mt-1" id="status-text">
+                            {% if subscription_active %}
+                            {% if ai_config.is_active %}AI Agent is <span
+                                class="text-green-600 font-semibold">Active</span>{% else %}AI Agent is <span
+                                class="text-red-600 font-semibold">Inactive</span>{% endif %}
+                            {% else %}
+                            AI Agent is <span class="text-red-600 font-semibold">Disabled (Subscription Expired)</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="flex-shrink-0 p-3 rounded-full {% if ai_config.is_active and subscription_active %}bg-green-100{% else %}bg-red-100{% endif %}"
+                        id="status-icon-bg">
+                        <svg class="w-6 h-6 {% if ai_config.is_active and subscription_active %}text-green-600{% else %}text-red-600{% endif %}"
+                            id="status-icon-svg" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Form -->
+        <div class="lg:col-span-2">
+            <div class="bg-white rounded-xl shadow-lg p-6">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">AI Settings</h2>
+
+                <form method="post" class="space-y-6">
+                    {% csrf_token %}
+                    {{ form.blocked_post_ids }}
+
+                    <!-- AI Agent Toggle -->
+                    <div
+                        class="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
+                        <div>
+                            <label for="ai-toggle" class="text-sm font-semibold text-gray-700 cursor-pointer">AI Agent
+                                Power</label>
+                            <p class="text-xs text-gray-500 mt-1">Turn your AI agent on or off</p>
+                        </div>
+                        {% if not subscription_active %}
+                        <!-- Subscription Expired State -->
+                        <div class="flex items-center space-x-2">
+                            <span
+                                class="text-xs font-semibold text-red-500 bg-red-50 px-2 py-1 rounded border border-red-100">Subscription
+                                Expired</span>
+                            <label class="relative inline-flex items-center cursor-not-allowed opacity-50">
+                                <input type="checkbox" disabled class="sr-only peer">
+                                <div
+                                    class="w-14 h-7 bg-gray-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all">
+                                </div>
+                            </label>
+                        </div>
+                        {% else %}
+                        <label for="ai-toggle" class="relative inline-flex items-center cursor-pointer">
+                            {{ form.is_active }}
+                            <div
+                                class="w-14 h-7 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-gradient-to-r peer-checked:from-green-400 peer-checked:to-green-600">
+                            </div>
+                        </label>
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Facebook Page ID
+                            <span class="text-gray-400 font-normal">(Required)</span>
+                        </label>
+                        {{ form.facebook_page_id }}
+                        {% if form.facebook_page_id.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.facebook_page_id.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-2 text-xs text-gray-500">
+                            Enter your Facebook Page ID. You can find this in your Facebook Page settings.
+                        </p>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            Facebook Page Api key
+                            <span class="text-gray-400 font-normal">(Required)</span>
+                        </label>
+                        {{ form.facebook_page_api }}
+                        {% if form.facebook_page_api.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.facebook_page_api.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-2 text-xs text-gray-500">
+                            Enter your Facebook Page API key. You can find this in your Facebook Page settings.
+                        </p>
+                    </div>
+
+
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">
+                            AI System Prompt
+                            <span class="text-gray-400 font-normal">(Optional)</span>
+                        </label>
+                        {{ form.system_prompt }}
+                        {% if form.system_prompt.errors %}
+                        <p class="mt-1 text-sm text-red-600">{{ form.system_prompt.errors.0 }}</p>
+                        {% endif %}
+                        <p class="mt-2 text-xs text-gray-500">
+                            Define how your AI agent should behave and respond. This is the system prompt that guides
+                            the AI's personality and responses.
+                        </p>
+                    </div>
+
+                    <!-- Blocked Post IDs Section -->
+                    <div class="border border-gray-200 rounded-xl p-5">
+                        <div class="flex items-center space-x-3 mb-4">
+                            <div class="p-2 bg-red-100 rounded-lg">
+                                <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636">
+                                    </path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-sm font-semibold text-gray-700">Block AI Agent on Specific Posts</h3>
+                                <p class="text-xs text-gray-500">Add Facebook post IDs where AI should not respond</p>
+                            </div>
+                        </div>
+
+                        <!-- Add Post ID Input -->
+                        <div class="flex space-x-2 mb-4">
+                            <input type="text" id="new-post-id-input"
+                                class="flex-1 px-4 py-2.5 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition duration-200 text-sm"
+                                placeholder="Enter Facebook Post ID">
+                            <button type="button" onclick="addPostId()"
+                                class="px-5 py-2.5 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 text-sm whitespace-nowrap">
+                                + Add
+                            </button>
+                        </div>
+
+                        <!-- Post IDs List -->
+                        <div id="post-ids-container" class="space-y-2 max-h-60 overflow-y-auto">
+                            <!-- Post IDs will be rendered here by JavaScript -->
+                        </div>
+
+                        <p id="no-posts-msg" class="text-xs text-gray-400 text-center py-3" style="display: none;">
+                            No blocked posts yet. Add a Facebook Post ID above.
+                        </p>
+                    </div>
+
+                    <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <div class="flex items-start space-x-3">
+                            <svg class="w-6 h-6 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                                viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="text-sm text-blue-800">
+                                <p class="font-semibold mb-1">Configuration Tips</p>
+                                <ul class="list-disc list-inside space-y-1 text-xs">
+                                    <li>Make your system prompt clear and specific</li>
+                                    <li>Define the AI's role, tone, and boundaries</li>
+                                    <li>Use the toggle to quickly turn your agent on/off</li>
+                                    <li>Block specific posts where you don't want AI responses</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center space-x-4 pt-4">
+                        <button type="submit"
+                            class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold py-3 px-6 rounded-lg hover:from-blue-700 hover:to-purple-700 transform hover:scale-105 transition-all duration-200 shadow-lg hover:shadow-xl">
+                            Save Configuration
+                        </button>
+                        <a href="{% url 'dashboard' %}"
+                            class="flex-1 text-center bg-gray-200 text-gray-700 font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-all duration-200">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="mt-6 bg-gradient-to-r from-purple-50 to-pink-50 rounded-xl shadow-lg p-6">
+                <h3 class="text-xl font-bold text-gray-800 mb-4">How to Use Your Webhook</h3>
+                <ol class="space-y-3 text-sm text-gray-700">
+                    <li class="flex items-start space-x-3">
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
+                        <span>Copy your webhook URL from the card on the left</span>
+                    </li>
+                    <li class="flex items-start space-x-3">
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
+                        <span>Configure your Facebook Page ID and AI system prompt</span>
+                    </li>
+                    <li class="flex items-start space-x-3">
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">3</span>
+                        <span>Add the webhook URL to your Facebook Page settings</span>
+                    </li>
+                    <li class="flex items-start space-x-3">
+                        <span
+                            class="flex-shrink-0 w-6 h-6 bg-purple-600 text-white rounded-full flex items-center justify-center text-xs font-bold">4</span>
+                        <span>Your AI agent will start responding to messages automatically</span>
+                    </li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // ====== Webhook Copy ======
+    function copyWebhookUrl() {
+        const webhookUrl = document.getElementById('webhook-url').textContent;
+        const copyBtnText = document.getElementById('copy-btn-text');
+
+        navigator.clipboard.writeText(webhookUrl).then(function () {
+            copyBtnText.textContent = 'Copied!';
+            setTimeout(function () {
+                copyBtnText.textContent = 'Copy URL';
+            }, 2000);
+        }, function (err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    // ====== Blocked Post IDs Management ======
+    const hiddenField = document.getElementById('id_blocked_post_ids');
+    const container = document.getElementById('post-ids-container');
+    const noPostsMsg = document.getElementById('no-posts-msg');
+    let postIds = [];
+
+    // Initialize from existing data
+    function initPostIds() {
+        const raw = hiddenField.value || '';
+        // Split by newline or comma, trim, and filter empty strings
+        postIds = raw.split(/[\n,]+/).map(s => s.trim()).filter(s => s.length > 0);
+        renderPostIds();
+    }
+
+    function syncHiddenField() {
+        // Join with newlines for storage
+        hiddenField.value = postIds.join('\n');
+    }
+
+    function renderPostIds() {
+        container.innerHTML = '';
+        if (postIds.length === 0) {
+            noPostsMsg.style.display = 'block';
+        } else {
+            noPostsMsg.style.display = 'none';
+            postIds.forEach(function (pid, index) {
+                const div = document.createElement('div');
+                div.className = 'flex items-center justify-between bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 group hover:bg-red-50 hover:border-red-200 transition-all duration-200';
+                div.innerHTML =
+                    '<div class="flex items-center space-x-3">' +
+                    '<span class="text-xs font-medium text-gray-400">#' + (index + 1) + '</span>' +
+                    '<code class="text-sm font-mono text-gray-700">' + pid + '</code>' +
+                    '</div>' +
+                    '<button type="button" onclick="removePostId(' + index + ')" ' +
+                    'class="text-gray-400 hover:text-red-600 transition-colors duration-200 p-1 rounded hover:bg-red-100">' +
+                    '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>' +
+                    '</svg>' +
+                    '</button>';
+                container.appendChild(div);
+            });
+        }
+    }
+
+    function addPostId() {
+        const input = document.getElementById('new-post-id-input');
+        const val = input.value.trim();
+        if (!val) return;
+        if (postIds.includes(val)) {
+            alert('This Post ID is already in the list.');
+            return;
+        }
+        postIds.push(val);
+        input.value = '';
+        syncHiddenField();
+        renderPostIds();
+        saveConfig(); // Auto-save
+        input.focus();
+    }
+
+    function removePostId(index) {
+        postIds.splice(index, 1);
+        syncHiddenField();
+        renderPostIds();
+        saveConfig(); // Auto-save
+    }
+
+    // Allow Enter key to add post ID
+    document.getElementById('new-post-id-input').addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            addPostId();
+        }
+    });
+
+    // ====== Auto-Save Logic ======
+    const saveStatusElement = document.getElementById('save-status');
+    const configForm = document.querySelector('form');
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+
+    function updateSaveStatus(status) {
+        if (!saveStatusElement) return;
+
+        if (status === 'saving') {
+            saveStatusElement.innerHTML = '<span class="flex items-center text-blue-600"><svg class="animate-spin w-4 h-4 mr-2" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Saving...</span>';
+        } else if (status === 'saved') {
+            saveStatusElement.innerHTML = '<span class="flex items-center text-green-600"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>All changes saved</span>';
+            setTimeout(() => {
+                // Keep the "Saved" message visible, don't clear it immediately
+            }, 3000);
+        } else if (status === 'error') {
+            saveStatusElement.innerHTML = '<span class="flex items-center text-red-600"><svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>Error saving</span>';
+        }
+    }
+
+    function saveConfig() {
+        updateSaveStatus('saving');
+
+        const formData = new FormData(configForm);
+
+        // Handle checkbox manual serialization if needed, but FormData usually handles it.
+        // However, unchecked checkboxes are not included in FormData.
+        // Our backend handling of `is_active` as required=False handles missing key as False, which is correct.
+
+        fetch(window.location.href, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'X-CSRFToken': csrfToken
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(data => {
+                if (data.status === 'success') {
+                    updateSaveStatus('saved');
+
+                    // Update Agent Status Card visual if is_active changed
+                    // (Optional: fetch new status or just update based on form data)
+                    const is_active = configForm.querySelector('[name="is_active"]').checked;
+                    const statusText = document.getElementById('status-text');
+                    const statusIconBg = document.getElementById('status-icon-bg');
+                    const statusIconSvg = document.getElementById('status-icon-svg');
+
+                    if (statusText && statusIconBg && statusIconSvg) {
+                        if (is_active) {
+                            statusText.innerHTML = 'AI Agent is <span class="text-green-600 font-semibold">Active</span>';
+                            statusIconBg.classList.remove('bg-red-100');
+                            statusIconBg.classList.add('bg-green-100');
+                            statusIconSvg.classList.remove('text-red-600');
+                            statusIconSvg.classList.add('text-green-600');
+                        } else {
+                            statusText.innerHTML = 'AI Agent is <span class="text-red-600 font-semibold">Inactive</span>';
+                            statusIconBg.classList.remove('bg-green-100');
+                            statusIconBg.classList.add('bg-red-100');
+                            statusIconSvg.classList.remove('text-green-600');
+                            statusIconSvg.classList.add('text-red-600');
+                        }
+                    }
+                } else {
+                    updateSaveStatus('error');
+                    console.error('Server error:', data.errors);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                updateSaveStatus('error');
+            });
+    }
+
+    // Debounce function
+    function debounce(func, wait) {
+        let timeout;
+        return function (...args) {
+            clearTimeout(timeout);
+            timeout = setTimeout(() => func.apply(this, args), wait);
+        };
+    }
+
+    const debouncedSave = debounce(saveConfig, 1000);
+
+    // Initialize on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        initPostIds();
+
+        // Attach listeners to inputs
+        const inputs = configForm.querySelectorAll('input:not([type="hidden"]), textarea');
+        inputs.forEach(input => {
+            if (input.id === 'new-post-id-input') return; // Skip the add post input
+
+            if (input.type === 'checkbox' || input.type === 'radio') {
+                input.addEventListener('change', saveConfig);
+            } else {
+                input.addEventListener('input', debouncedSave);
+            }
+        });
+    });
+</script>
+{% endblock %}
