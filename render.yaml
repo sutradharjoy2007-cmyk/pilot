@@ -1,29 +1,20 @@
 # render.yaml — Render Deployment Blueprint
-# Docs: https://render.com/docs/blueprint-spec
+# Uses your existing Supabase PostgreSQL database.
 #
 # How to use:
 #  1. Push this repo to GitHub / GitLab.
-#  2. In Render dashboard → New → Blueprint → connect your repo.
-#  3. Render reads this file and creates the web service + Postgres DB automatically.
-#  4. Set the secret env vars (EMAIL_HOST_PASSWORD, SECRET_KEY) manually in the
-#     Render dashboard after the first deploy (they are not stored here for security).
-
-databases:
-  - name: pagepilot-db
-    databaseName: pagepilot_db
-    user: pagepilot_user
-    plan: free           # upgrade to starter/standard for production
+#  2. Render dashboard → New → Blueprint → connect your repo.
+#  3. After first deploy, go to your service's Environment tab and set
+#     all variables marked with sync: false.
 
 services:
   - type: web
     name: pagepilot
-    runtime: docker       # Render will build & run your Dockerfile
+    runtime: docker
     plan: free            # upgrade when ready
-    region: oregon        # closest to your users; options: oregon, frankfurt, singapore, ohio
-    branch: main          # change to your default branch name if different
+    region: oregon
+    branch: main
 
-    # Environment Variables
-    # Non-secret vars go here. Secret vars → set in Render dashboard.
     envVars:
       - key: DEBUG
         value: "False"
@@ -35,34 +26,33 @@ services:
         value: "https://pagepilot-btwt.onrender.com"
 
       - key: SECRET_KEY
-        generateValue: true   # Render auto-generates a secure key on first deploy
+        generateValue: true
 
-      # PostgreSQL — auto-filled from the database above
+      # ── Supabase Database ──────────────────────────────────────────
+      # Paste your full Supabase connection string in the Render dashboard.
+      # Format: postgresql://postgres:<PASSWORD>@db.<ref>.supabase.co:5432/postgres
       - key: DATABASE_URL
-        fromDatabase:
-          name: pagepilot-db
-          property: connectionString
+        sync: false       # set manually in Render dashboard (contains your password)
 
-      # Email — fill these in the Render dashboard (not stored here)
+      # ── Email ─────────────────────────────────────────────────────
       - key: EMAIL_HOST
         value: smtp.gmail.com
       - key: EMAIL_PORT
         value: "587"
       - key: EMAIL_HOST_USER
-        sync: false           # set manually in dashboard
+        sync: false
       - key: EMAIL_HOST_PASSWORD
-        sync: false           # set manually in dashboard
+        sync: false
       - key: DEFAULT_FROM_EMAIL
-        sync: false           # e.g. "Page Pilot <you@gmail.com>"
+        sync: false
 
-      # Site info
+      # ── Site info ─────────────────────────────────────────────────
       - key: SITE_NAME
         value: "Page Pilot"
       - key: SITE_URL
         value: "https://pagepilot-btwt.onrender.com"
 
-      # API admin password
       - key: API_ADMIN_PASSWORD
-        sync: false           # set manually in dashboard
+        sync: false
 
     healthCheckPath: /accounts/login/
